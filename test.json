@@ -1,0 +1,9 @@
+{
+    "$schema": "./assets/api-fetch-args-config.scheme.json",
+    "services": [{
+        "-T": true,
+        "-n": "test1",
+        "-s": "file_cfg_ts_service",
+        "-u": "https://yapi.smarteye.com/api/open/plugin/export-full?type=json&pid=222&status=all&token=09db1079a75f8827af51638e591c63ab6727875fff3f8996023bb6f05259167b"
+    }]
+}

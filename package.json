@@ -1,0 +1,22 @@
+{
+  "name": "ypai-ts-service-builder",
+  "version": "0.0.1",
+  "description": "build ts service for yapi",
+  "main": "index.js",
+  "scripts": {
+    "services": "tsc -w",
+    "test": "node ./dist/api-fetch.js -c ./test.json"
+  },
+  "bin": {
+    "YApiServicesBuild": "./dist/api-fetch.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.10.5",
+    "auto-service": "^3.5.4",
+    "commander": "^8.2.0",
+    "npx": "^10.2.2",
+    "typescript": "^4.3.5"
+  }
+}

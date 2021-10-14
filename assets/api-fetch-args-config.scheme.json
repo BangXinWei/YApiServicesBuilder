@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "http://example.com/product.schema.json",
+  "title": "autos creator",
+  "description": "utils for create autos quickly",
+  "type": "object",
+  "properties": {
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "-T": {
+            "type": "boolean",
+            "description": "生成独立template，将会在-s/-u 目录下生成typescript-kit 作为模版，如果存在就不生成"
+          },
+          "-s": {
+            "type": "string",
+            "description": "生成ts server的根目录"
+          },
+          "-u": {
+            "type": "string",
+            "description": "yapi url path, 详见yapi项目->设置->生成ts services"
+          },
+          "-n": {
+            "type": "string",
+            "description": "接口名称  会按照接口名称生成目录，会按照apiUrl进行唯一性判断"
+          },
+          "-t": {
+            "type": "string",
+            "description": "模版路径, https://gogoyqj.github.io/auto-service/getting-started#222-swaggerparser-%E5%8F%82%E6%95%B0"
+          }
+        },
+        "required": ["-s", "-u", "-n"]
+      }
+    }
+  }
+}
