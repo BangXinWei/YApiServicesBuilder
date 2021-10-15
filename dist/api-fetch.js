@@ -48,7 +48,7 @@ commander_1.program
 });
 commander_1.program
     .version(pkgFile.version)
-    .description("基于yapi快速构建typescript接口库工具")
+    .description("基于yapi快速构建typescript接口库 Autos（https://gogoyqj.github.io/auto-service/）工具")
     .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "")
     .option("-T, --createTemplate <p>", "生成独立template，将会在-s/-u 目录下生成typescript-kit 作为模版，如果存在就不生成")
     .option("-s, --sDir <p>", "生成ts server的根目录")
@@ -141,19 +141,28 @@ commander_1.program
             }
             commandArgs.templateDir = `./${commandArgs.servicesDir}/${commandArgs.apiName}/template`;
         }
-        const json2service = {
-            url: `swagger.json`,
-            remoteUrl: `api.json`,
-            type: "yapi",
-            swaggerParser: {
-                "-o": `services`,
-                "-t": commandArgs.templateDir.length > 0
-                    ? GetPathUtils(commandArgs.templateDir)
-                    : undefined,
-            },
-        };
-        const json2serviceFile = fs_1.default.createWriteStream(`${commandArgs.apiPath}/json2service.js`);
-        json2serviceFile.write(`module.exports = ` + JSON.stringify(json2service));
+        if (!fs_1.default.existsSync(`${commandArgs.apiPath}/json2service.js`)) {
+            const json2service = {
+                url: `swagger.json`,
+                remoteUrl: `api.json`,
+                type: "yapi",
+                swaggerParser: {
+                    "-o": `services`,
+                    "-t": commandArgs.templateDir.length > 0
+                        ? GetPathUtils(commandArgs.templateDir)
+                        : undefined,
+                },
+            };
+            const json2serviceFile = fs_1.default.createWriteStream(`${commandArgs.apiPath}/json2service.js`);
+            json2serviceFile.write(`// https://gogoyqj.github.io/auto-service 的主配置文件 \n module.exports = ` +
+                JSON.stringify(json2service, null, 2));
+        }
+        const indexTsPath = `${commandArgs.apiPath}/index.ts`;
+        if (!fs_1.default.existsSync(indexTsPath)) {
+            const json2serviceFile = fs_1.default.createWriteStream(indexTsPath);
+            json2serviceFile.write(`// 导出services 全部模块 \nexport * from "./services"
+          `);
+        }
     }
     // autos https://gogoyqj.github.io/auto-service/
     function fetchThenAutos(commandArgs) {

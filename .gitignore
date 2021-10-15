@@ -4,3 +4,4 @@
 yApi-ts-server.cfg.json
 .vscode/settings.json
 package-lock.json
+/dist/file_cfg_ts_service

@@ -60,7 +60,9 @@ program
 
 program
   .version(pkgFile.version)
-  .description("基于yapi快速构建typescript接口库工具")
+  .description(
+    "基于yapi快速构建typescript接口库 Autos（https://gogoyqj.github.io/auto-service/）工具"
+  )
   .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "")
   .option(
     "-T, --createTemplate <p>",
@@ -193,25 +195,37 @@ program
         commandArgs.templateDir = `./${commandArgs.servicesDir}/${commandArgs.apiName}/template`;
       }
 
-      const json2service = {
-        url: `swagger.json`,
-        remoteUrl: `api.json`,
-        type: "yapi",
-        swaggerParser: {
-          "-o": `services`,
-          "-t":
-            commandArgs.templateDir.length > 0
-              ? GetPathUtils(commandArgs.templateDir)
-              : undefined,
-        },
-      };
+      if (!fs.existsSync(`${commandArgs.apiPath}/json2service.js`)) {
+        const json2service = {
+          url: `swagger.json`,
+          remoteUrl: `api.json`,
+          type: "yapi",
+          swaggerParser: {
+            "-o": `services`,
+            "-t":
+              commandArgs.templateDir.length > 0
+                ? GetPathUtils(commandArgs.templateDir)
+                : undefined,
+          },
+        };
 
-      const json2serviceFile = fs.createWriteStream(
-        `${commandArgs.apiPath}/json2service.js`
-      );
-      json2serviceFile.write(
-        `module.exports = ` + JSON.stringify(json2service)
-      );
+        const json2serviceFile = fs.createWriteStream(
+          `${commandArgs.apiPath}/json2service.js`
+        );
+        json2serviceFile.write(
+          `// https://gogoyqj.github.io/auto-service 的主配置文件 \n module.exports = ` +
+            JSON.stringify(json2service, null, 2)
+        );
+      }
+
+      const indexTsPath = `${commandArgs.apiPath}/index.ts`;
+      if (!fs.existsSync(indexTsPath)) {
+        const json2serviceFile = fs.createWriteStream(indexTsPath);
+        json2serviceFile.write(
+          `// 导出services 全部模块 \nexport * from "./services"
+          `
+        );
+      }
     }
 
     // autos https://gogoyqj.github.io/auto-service/
