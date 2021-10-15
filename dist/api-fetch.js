@@ -18,10 +18,11 @@ function GetPathUtils(...szPath) {
 }
 const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
+const cfgFileName = "yApi-ts-server.cfg.json";
 commander_1.program
     .command("init")
     .description("创建配置文件")
-    .argument("[fileName]", "配置文件名", "yApi-ts-server.cfg.json")
+    .argument("[fileName]", "配置文件名", cfgFileName)
     .action((fileName) => {
     //console.log(fileName, __dirname, path.join(__dirname, "../"));
     const currentModule = path_1.default.join(__dirname, "../");
@@ -50,18 +51,27 @@ commander_1.program
     .option("-t, --template <p>", "模版路径, https://gogoyqj.github.io/auto-service/getting-started#222-swaggerparser-%E5%8F%82%E6%95%B0", "")
     .action((cmdObj) => {
     if (process.argv.length == 2) {
+        const dstFilePath = GetPathUtils(cfgFileName);
         const createParams = process.argv.slice(0, 2);
-        createParams.push('--help');
-        commander_1.program.parse(createParams);
-        return;
+        if (fs_1.default.existsSync(dstFilePath)) {
+            cmdObj.configPath = cfgFileName;
+        }
+        else {
+            createParams.push("--help");
+            commander_1.program.parse(createParams);
+            return;
+        }
     }
     const { configPath } = cmdObj;
     if (configPath && configPath.length > 0) {
         const cfgPath = GetPathUtils(configPath);
-        //console.log(cfgPath);
         const jsonParams = require(cfgPath);
         const createParams = process.argv.slice(0, 2);
         if (jsonParams.services && jsonParams.services instanceof Array) {
+            if (jsonParams.services.length == 0) {
+                console.warn("warning: no services config is founded in cfg file");
+                return;
+            }
             jsonParams.services.forEach((jsonParam) => {
                 for (let index in jsonParam) {
                     if (index.indexOf("$s") < 0) {
