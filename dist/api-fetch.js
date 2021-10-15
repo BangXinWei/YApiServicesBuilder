@@ -80,6 +80,7 @@ commander_1.program
                     }
                 }
                 cmdObj.configPath = undefined;
+                process.argv = createParams;
                 commander_1.program.parse(createParams);
             });
         }
@@ -156,6 +157,7 @@ commander_1.program
             .on("close", () => {
             (0, child_process_1.spawn)(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
                 cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
+                stdio: "inherit"
             });
         });
     }

@@ -104,6 +104,7 @@ program
           }
 
           cmdObj.configPath = undefined;
+          process.argv = createParams
           program.parse(createParams);
         });
       }
@@ -216,6 +217,7 @@ program
         .on("close", () => {
           spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
             cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
+            stdio: "inherit"
           });
         });
     }
