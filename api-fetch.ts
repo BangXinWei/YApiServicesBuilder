@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 declare const process: {
   env: {
     NODE_TLS_REJECT_UNAUTHORIZED: number;
@@ -51,12 +52,8 @@ program
 
 program
   .version("0.0.1")
-  .description("基于yapi快速构建typescript接口库")
-  .option(
-    "-c, --configPath <p>",
-    "当命令行参数以配置文件形式填写路径",
-    "configPath"
-  )
+  .description("基于yapi快速构建typescript接口库工具")
+  .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "")
   .option(
     "-T, --createTemplate <p>",
     "生成独立template，将会在-s/-u 目录下生成typescript-kit 作为模版，如果存在就不生成"
@@ -73,6 +70,13 @@ program
     ""
   )
   .action((cmdObj) => {
+    if (process.argv.length == 2) {
+      const createParams = process.argv.slice(0, 2);
+      createParams.push('--help')
+      program.parse(createParams);
+      return;
+    }
+
     const { configPath } = cmdObj;
 
     if (configPath && configPath.length > 0) {
@@ -114,6 +118,9 @@ program
 
     if (Object.values(cmdObj).findIndex((item) => item == undefined) > 0) {
       console.error("args has error");
+      const createParams = process.argv.slice(0, 2);
+      createParams.push("--help");
+      program.parse(createParams);
       return;
     }
 
