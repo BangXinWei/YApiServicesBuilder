@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -40,14 +41,20 @@ commander_1.program
 });
 commander_1.program
     .version("0.0.1")
-    .description("基于yapi快速构建typescript接口库")
-    .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "configPath")
+    .description("基于yapi快速构建typescript接口库工具")
+    .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "")
     .option("-T, --createTemplate <p>", "生成独立template，将会在-s/-u 目录下生成typescript-kit 作为模版，如果存在就不生成")
     .option("-s, --sDir <p>", "生成ts server的根目录")
     .option("-u, --url <p>", "yapi url path, 详见yapi项目->设置->生成ts services")
     .option("-n, --pName <p>", "接口名称  会按照接口名称生成目录，会按照apiUrl进行唯一性判断")
     .option("-t, --template <p>", "模版路径, https://gogoyqj.github.io/auto-service/getting-started#222-swaggerparser-%E5%8F%82%E6%95%B0", "")
     .action((cmdObj) => {
+    if (process.argv.length == 2) {
+        const createParams = process.argv.slice(0, 2);
+        createParams.push('--help');
+        commander_1.program.parse(createParams);
+        return;
+    }
     const { configPath } = cmdObj;
     if (configPath && configPath.length > 0) {
         const cfgPath = GetPathUtils(configPath);
@@ -71,6 +78,9 @@ commander_1.program
     const { url, pName, sDir, template, createTemplate, } = cmdObj;
     if (Object.values(cmdObj).findIndex((item) => item == undefined) > 0) {
         console.error("args has error");
+        const createParams = process.argv.slice(0, 2);
+        createParams.push("--help");
+        commander_1.program.parse(createParams);
         return;
     }
     const commandArgs = {
@@ -134,7 +144,7 @@ commander_1.program
         https_1.default
             .get(commandArgs.yApiUrl, (data) => data.pipe(fs_1.default.createWriteStream(savePath)))
             .on("close", () => {
-            child_process_1.spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
+            (0, child_process_1.spawn)(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
                 cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
             });
         });
