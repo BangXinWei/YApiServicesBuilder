@@ -27,13 +27,13 @@ const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
 const cfgFileName = "yApi-ts-server.cfg.json";
 
+const pkgFile: { version: string } = require("../package.json");
+
 program
   .command("init")
   .description("创建配置文件")
   .argument("[fileName]", "配置文件名", cfgFileName)
   .action((fileName: string) => {
-    //console.log(fileName, __dirname, path.join(__dirname, "../"));
-
     const currentModule = path.join(__dirname, "../");
     const runTimePackage = process.cwd();
     const dstFilePath = GetPathUtils(fileName);
@@ -52,7 +52,7 @@ program
   });
 
 program
-  .version("0.0.1")
+  .version(pkgFile.version)
   .description("基于yapi快速构建typescript接口库工具")
   .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "")
   .option(
@@ -91,7 +91,7 @@ program
       const createParams = process.argv.slice(0, 2);
       if (jsonParams.services && jsonParams.services instanceof Array) {
         if (jsonParams.services.length == 0) {
-          console.warn("warning: no services config is founded in cfg file")
+          console.warn("warning: no services config is founded in cfg file");
           return;
         }
 
@@ -104,7 +104,7 @@ program
           }
 
           cmdObj.configPath = undefined;
-          process.argv = createParams
+          process.argv = createParams;
           program.parse(createParams);
         });
       }
@@ -217,7 +217,7 @@ program
         .on("close", () => {
           spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
             cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
-            stdio: "inherit"
+            stdio: "inherit",
           });
         });
     }

@@ -19,6 +19,8 @@ function GetPathUtils(...szPath) {
 const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
 const cfgFileName = "yApi-ts-server.cfg.json";
+const pkgFile = require("../package.json") 
+console.log(pkgFile)
 commander_1.program
     .command("init")
     .description("创建配置文件")
