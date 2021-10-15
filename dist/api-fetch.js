@@ -16,17 +16,21 @@ function GetPathUtils(...szPath) {
     }
     return path_1.default.join(process.cwd(), ...szPath);
 }
+function GetBuilderPathUtils(...szPath) {
+    if (szPath.filter((item) => item.indexOf(":") >= 0).length > 0) {
+        return path_1.default.join(...szPath);
+    }
+    return path_1.default.join(process.argv[1], "../../", ...szPath);
+}
 const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
 const cfgFileName = "yApi-ts-server.cfg.json";
-const pkgFile = require("../package.json") 
-console.log(pkgFile)
+const pkgFile = require("../package.json");
 commander_1.program
     .command("init")
     .description("创建配置文件")
     .argument("[fileName]", "配置文件名", cfgFileName)
     .action((fileName) => {
-    //console.log(fileName, __dirname, path.join(__dirname, "../"));
     const currentModule = path_1.default.join(__dirname, "../");
     const runTimePackage = process.cwd();
     const dstFilePath = GetPathUtils(fileName);
@@ -43,7 +47,7 @@ commander_1.program
     }
 });
 commander_1.program
-    .version("0.0.1")
+    .version(pkgFile.version)
     .description("基于yapi快速构建typescript接口库工具")
     .option("-c, --configPath <p>", "当命令行参数以配置文件形式填写路径", "")
     .option("-T, --createTemplate <p>", "生成独立template，将会在-s/-u 目录下生成typescript-kit 作为模版，如果存在就不生成")
@@ -132,7 +136,7 @@ commander_1.program
             const copyDst = path_1.default.resolve(commandArgs.apiPath, templateFileName);
             if (fs_1.default.existsSync(copyDst) == false) {
                 fs_1.default.mkdirSync(copyDst);
-                const copySrc = path_1.default.resolve(templateFileSrc);
+                const copySrc = GetBuilderPathUtils(templateFileSrc);
                 copyFile(copySrc, copyDst);
             }
             commandArgs.templateDir = `./${commandArgs.servicesDir}/${commandArgs.apiName}/template`;
@@ -157,9 +161,9 @@ commander_1.program
         https_1.default
             .get(commandArgs.yApiUrl, (data) => data.pipe(fs_1.default.createWriteStream(savePath)))
             .on("close", () => {
-            (0, child_process_1.spawn)(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
+            child_process_1.spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
                 cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
-                stdio: "inherit"
+                stdio: "inherit",
             });
         });
     }

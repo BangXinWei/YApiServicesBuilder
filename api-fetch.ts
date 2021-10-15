@@ -23,6 +23,13 @@ function GetPathUtils(...szPath: Array<string>) {
   return path.join(process.cwd(), ...szPath);
 }
 
+function GetBuilderPathUtils(...szPath: Array<string>) {
+  if (szPath.filter((item) => item.indexOf(":") >= 0).length > 0) {
+    return path.join(...szPath);
+  }
+  return path.join(process.argv[1], "../../", ...szPath);
+}
+
 const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
 const cfgFileName = "yApi-ts-server.cfg.json";
@@ -179,7 +186,7 @@ program
 
         if (fs.existsSync(copyDst) == false) {
           fs.mkdirSync(copyDst);
-          const copySrc = path.resolve(templateFileSrc);
+          const copySrc = GetBuilderPathUtils(templateFileSrc);
           copyFile(copySrc, copyDst);
         }
 
