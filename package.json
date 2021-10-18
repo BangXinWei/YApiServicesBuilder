@@ -1,8 +1,7 @@
 {
   "name": "ypai-ts-service-builder",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "build ts service for yapi",
-  "main": "index.js",
   "scripts": {
     "services": "tsc -w",
     "test": "node ./dist/api-fetch.js -c ./test.json"
