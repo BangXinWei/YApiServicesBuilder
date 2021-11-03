@@ -204,7 +204,7 @@ program
             "-o": `services`,
             "-t":
               commandArgs.templateDir.length > 0
-                ? GetPathUtils(commandArgs.templateDir)
+                ? './template'
                 : undefined,
           },
         };
