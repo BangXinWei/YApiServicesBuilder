@@ -148,9 +148,7 @@ commander_1.program
                 type: "yapi",
                 swaggerParser: {
                     "-o": `services`,
-                    "-t": commandArgs.templateDir.length > 0
-                        ? GetPathUtils(commandArgs.templateDir)
-                        : undefined,
+                    "-t": commandArgs.templateDir.length > 0 ? "./template" : undefined,
                 },
             };
             const json2serviceFile = fs_1.default.createWriteStream(`${commandArgs.apiPath}/json2service.js`);
@@ -170,7 +168,7 @@ commander_1.program
         https_1.default
             .get(commandArgs.yApiUrl, (data) => data.pipe(fs_1.default.createWriteStream(savePath)))
             .on("close", () => {
-            child_process_1.spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
+            (0, child_process_1.spawn)(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`, '-c', 'json2service.js'], {
                 cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
                 stdio: "inherit",
             });

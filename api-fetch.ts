@@ -202,10 +202,7 @@ program
           type: "yapi",
           swaggerParser: {
             "-o": `services`,
-            "-t":
-              commandArgs.templateDir.length > 0
-                ? './template'
-                : undefined,
+            "-t": commandArgs.templateDir.length > 0 ? "./template" : undefined,
           },
         };
 
@@ -236,7 +233,7 @@ program
           data.pipe(fs.createWriteStream(savePath))
         )
         .on("close", () => {
-          spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`], {
+          spawn(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`, '-c', 'json2service.js'], {
             cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
             stdio: "inherit",
           });
