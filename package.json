@@ -1,6 +1,6 @@
 {
   "name": "ypai-ts-service-builder",
-  "version": "^0.0.8",
+  "version": "^0.0.9",
   "description": "build ts service for yapi",
   "scripts": {
     "services": "tsc -w",
