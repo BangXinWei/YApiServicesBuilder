@@ -1,6 +1,6 @@
 {
   "name": "ypai-ts-service-builder",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "build ts service for yapi",
   "scripts": {
     "services": "tsc -w",
@@ -10,7 +10,9 @@
   "bin": {
     "YApiServicesBuild": "./dist/api-fetch.js"
   },
-  "pre-push": ["autoVersion"],
+  "pre-push": [
+    "autoVersion"
+  ],
   "files": [
     "dist",
     "assets"
