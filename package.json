@@ -5,7 +5,7 @@
   "scripts": {
     "services": "tsc -w",
     "test": "node ./dist/api-fetch.js -c ./test.json",
-    "autoVersion": "node ./dist/autoVersion/cli.js"
+    "autoVersion": "ls"
   },
   "bin": {
     "YApiServicesBuild": "./dist/api-fetch.js"
