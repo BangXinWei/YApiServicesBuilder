@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-
+console.log(process.cwd());
 const packageInfo: { version: string } = require("../../package.json");
 console.log(packageInfo, packageInfo.version);
 const szVersion = packageInfo.version.split(".");
