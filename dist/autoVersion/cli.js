@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = require("child_process");
-console.log(process.cwd());
+//console.log(process.cwd());
 const packageInfo = require("../../package.json");
-console.log(packageInfo, packageInfo.version);
+//console.log(packageInfo, packageInfo.version);
 const szVersion = packageInfo.version.split(".");
 const newVersion = parseInt(szVersion[2]) + 1;
 const dstVersion = `${szVersion[0]}.${szVersion[1]}.${newVersion}`;
