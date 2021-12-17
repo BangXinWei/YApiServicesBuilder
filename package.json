@@ -4,12 +4,17 @@
   "description": "build ts service for yapi",
   "scripts": {
     "services": "tsc -w",
-    "test": "node ./dist/api-fetch.js -c ./test.json"
+    "test": "node ./dist/api-fetch.js -c ./test.json",
+    "autoVersion": "node ./dist/autoVersion/cli.js"
   },
   "bin": {
     "YApiServicesBuild": "./dist/api-fetch.js"
   },
-  "files": ["dist", "assets"],
+  "pre-push": ["autoVersion"],
+  "files": [
+    "dist",
+    "assets"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -19,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^16.10.5",
+    "pre-push": "^0.1.1",
     "typescript": "^4.3.5"
   }
 }

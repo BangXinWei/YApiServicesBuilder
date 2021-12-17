@@ -78,5 +78,5 @@
     "forceConsistentCasingInFileNames": true, /* Disallow inconsistently-cased references to the same file. */
     "suppressImplicitAnyIndexErrors": true
   },
-  "include": ["api-fetch.ts"]
+  "include": ["./src/**/*.ts"]
 }
