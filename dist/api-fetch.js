@@ -24,6 +24,8 @@ function GetBuilderPathUtils(...szPath) {
 }
 const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
+const service2jsonFileSrc = "assets/json2service.js";
+const indexTsFileSrc = "assets/index.ts";
 const cfgFileName = "yApi-ts-server.cfg.json";
 const pkgFile = require("../package.json");
 commander_1.program
@@ -41,13 +43,11 @@ commander_1.program
             $schema: schemeJsonPath,
             services: [],
         };
-        //console.log(schemeJsonPath, jsonCfg);
         const writer = fs_1.default.createWriteStream(dstFilePath);
         writer.write(JSON.stringify(jsonCfg, null, 2));
     }
 });
 function resolveParams(params) {
-    console.log(params);
     const { "-s": sDir, "-T": createTemplate, "-u": url, "-n": pName, "-t": template, } = params;
     return {
         sDir: sDir ? sDir : "",
@@ -132,37 +132,57 @@ function DoAutosWithCfg(params, cb) {
         if (!fs_1.default.existsSync(commandArgs.apiPath)) {
             fs_1.default.mkdirSync(commandArgs.apiPath);
         }
-        if (commandArgs.bCreateTemp) {
-            const copyDst = path_1.default.resolve(commandArgs.apiPath, templateFileName);
+        const cpTasks = [];
+        function CreateCpTask(srcFile, dstFile) {
+            const copyDst = path_1.default.resolve(commandArgs.apiPath, dstFile);
             if (fs_1.default.existsSync(copyDst) == false) {
-                fs_1.default.mkdirSync(copyDst);
-                const copySrc = GetBuilderPathUtils(templateFileSrc);
-                fs_1.default.cpSync(copySrc, copyDst, {
+                const copySrc = GetBuilderPathUtils(srcFile);
+                cpTasks.push({
+                    copySrc,
+                    copyDst,
+                });
+            }
+        }
+        if (commandArgs.bCreateTemp) {
+            CreateCpTask(templateFileSrc, templateFileName);
+        }
+        CreateCpTask(service2jsonFileSrc, "json2service.js");
+        CreateCpTask(indexTsFileSrc, "index.ts");
+        cpTasks.forEach((cpTask) => {
+            if (fs_1.default.existsSync(cpTask.copyDst) == false) {
+                fs_1.default.cpSync(cpTask.copySrc, cpTask.copyDst, {
                     recursive: true,
                 });
             }
-            commandArgs.templateDir = `./${commandArgs.servicesDir}/${commandArgs.apiName}/template`;
-        }
-        if (!fs_1.default.existsSync(`${commandArgs.apiPath}/json2service.js`)) {
-            const json2service = {
-                url: `swagger.json`,
-                remoteUrl: `api.json`,
-                type: "yapi",
-                swaggerParser: {
-                    "-o": `services`,
-                    "-t": commandArgs.templateDir.length > 0 ? "./template" : undefined,
-                },
-            };
-            const json2serviceFile = fs_1.default.createWriteStream(`${commandArgs.apiPath}/json2service.js`);
-            json2serviceFile.write(`// https://gogoyqj.github.io/auto-service 的主配置文件 \n module.exports = ` +
-                JSON.stringify(json2service, null, 2));
-        }
-        const indexTsPath = `${commandArgs.apiPath}/index.ts`;
-        if (!fs_1.default.existsSync(indexTsPath)) {
-            const json2serviceFile = fs_1.default.createWriteStream(indexTsPath);
-            json2serviceFile.write(`// 导出services 全部模块 \nexport * from "./services"
-        `);
-        }
+        });
+        // if (!fs.existsSync(`${commandArgs.apiPath}/json2service.js`)) {
+        //   const json2service = {
+        //     url: `swagger.json`,
+        //     remoteUrl: `api.json`,
+        //     type: "yapi",
+        //     swaggerParser: {
+        //       "-o": `services`,
+        //       "-t": commandArgs.templateDir.length > 0 ? "./template" : undefined,
+        //     },
+        //     swaggerConfig: {
+        //       modifier: eval('function b11(){}'),
+        //     },
+        //   };
+        //   const data =
+        //     `// https://gogoyqj.github.io/auto-service 的主配置文件 \n module.exports = ` +
+        //     JSON.stringify(json2service, null, 2);
+        //   fs.writeFileSync(`${commandArgs.apiPath}/json2service.js`, data, {
+        //     encoding: "utf-8",
+        //   });
+        // }
+        // const indexTsPath = `${commandArgs.apiPath}/index.ts`;
+        // if (!fs.existsSync(indexTsPath)) {
+        //   const json2serviceFile = fs.createWriteStream(indexTsPath);
+        //   json2serviceFile.write(
+        //     `// 导出services 全部模块 \nexport * from "./services"
+        //     `
+        //   );
+        // }
     }
     // autos https://gogoyqj.github.io/auto-service/
     function fetchThenAutos(commandArgs) {

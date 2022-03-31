@@ -32,6 +32,8 @@ function GetBuilderPathUtils(...szPath: Array<string>) {
 
 const templateFileName = "template";
 const templateFileSrc = "assets/ts_services_template/typescript-tkit";
+const service2jsonFileSrc = "assets/json2service.js";
+const indexTsFileSrc = "assets/index.ts";
 const cfgFileName = "yApi-ts-server.cfg.json";
 
 const pkgFile: { version: string } = require("../package.json");
@@ -51,14 +53,12 @@ program
         $schema: schemeJsonPath,
         services: [],
       };
-      //console.log(schemeJsonPath, jsonCfg);
       const writer = fs.createWriteStream(dstFilePath);
       writer.write(JSON.stringify(jsonCfg, null, 2));
     }
   });
 
 function resolveParams(params: any): IAutosCfg {
-  console.log(params);
   const {
     "-s": sDir,
     "-T": createTemplate,
@@ -191,48 +191,65 @@ function DoAutosWithCfg(params: IAutosCfg, cb: (err?: Error) => void) {
       fs.mkdirSync(commandArgs.apiPath);
     }
 
-    if (commandArgs.bCreateTemp) {
-      const copyDst = path.resolve(commandArgs.apiPath, templateFileName);
+    const cpTasks: Array<{ copySrc: string; copyDst: string }> = [];
 
+    function CreateCpTask(srcFile: string, dstFile: string) {
+      const copyDst = path.resolve(commandArgs.apiPath, dstFile);
       if (fs.existsSync(copyDst) == false) {
-        fs.mkdirSync(copyDst);
-        const copySrc = GetBuilderPathUtils(templateFileSrc);
-        fs.cpSync(copySrc, copyDst, {
+        const copySrc = GetBuilderPathUtils(srcFile);
+        cpTasks.push({
+          copySrc,
+          copyDst,
+        });
+      }
+    }
+
+    if (commandArgs.bCreateTemp) {
+      CreateCpTask(templateFileSrc, templateFileName)
+    }
+
+    CreateCpTask(service2jsonFileSrc, "json2service.js")
+    CreateCpTask(indexTsFileSrc, "index.ts")
+
+    cpTasks.forEach((cpTask) => {
+      if (fs.existsSync(cpTask.copyDst) == false) {
+        fs.cpSync(cpTask.copySrc, cpTask.copyDst, {
           recursive: true,
         });
       }
+    });
 
-      commandArgs.templateDir = `./${commandArgs.servicesDir}/${commandArgs.apiName}/template`;
-    }
+    // if (!fs.existsSync(`${commandArgs.apiPath}/json2service.js`)) {
+    //   const json2service = {
+    //     url: `swagger.json`,
+    //     remoteUrl: `api.json`,
+    //     type: "yapi",
+    //     swaggerParser: {
+    //       "-o": `services`,
+    //       "-t": commandArgs.templateDir.length > 0 ? "./template" : undefined,
+    //     },
+    //     swaggerConfig: {
+    //       modifier: eval('function b11(){}'),
+    //     },
+    //   };
 
-    if (!fs.existsSync(`${commandArgs.apiPath}/json2service.js`)) {
-      const json2service = {
-        url: `swagger.json`,
-        remoteUrl: `api.json`,
-        type: "yapi",
-        swaggerParser: {
-          "-o": `services`,
-          "-t": commandArgs.templateDir.length > 0 ? "./template" : undefined,
-        },
-      };
+    //   const data =
+    //     `// https://gogoyqj.github.io/auto-service 的主配置文件 \n module.exports = ` +
+    //     JSON.stringify(json2service, null, 2);
 
-      const json2serviceFile = fs.createWriteStream(
-        `${commandArgs.apiPath}/json2service.js`
-      );
-      json2serviceFile.write(
-        `// https://gogoyqj.github.io/auto-service 的主配置文件 \n module.exports = ` +
-          JSON.stringify(json2service, null, 2)
-      );
-    }
+    //   fs.writeFileSync(`${commandArgs.apiPath}/json2service.js`, data, {
+    //     encoding: "utf-8",
+    //   });
+    // }
 
-    const indexTsPath = `${commandArgs.apiPath}/index.ts`;
-    if (!fs.existsSync(indexTsPath)) {
-      const json2serviceFile = fs.createWriteStream(indexTsPath);
-      json2serviceFile.write(
-        `// 导出services 全部模块 \nexport * from "./services"
-        `
-      );
-    }
+    // const indexTsPath = `${commandArgs.apiPath}/index.ts`;
+    // if (!fs.existsSync(indexTsPath)) {
+    //   const json2serviceFile = fs.createWriteStream(indexTsPath);
+    //   json2serviceFile.write(
+    //     `// 导出services 全部模块 \nexport * from "./services"
+    //     `
+    //   );
+    // }
   }
 
   // autos https://gogoyqj.github.io/auto-service/
