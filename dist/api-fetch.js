@@ -46,6 +46,17 @@ commander_1.program
         writer.write(JSON.stringify(jsonCfg, null, 2));
     }
 });
+function resolveParams(params) {
+    console.log(params);
+    const { "-s": sDir, "-T": createTemplate, "-u": url, "-n": pName, "-t": template, } = params;
+    return {
+        sDir: sDir ? sDir : "",
+        createTemplate: createTemplate ? createTemplate : false,
+        url: url ? url : "",
+        pName: pName ? pName : "",
+        template: template ? template : "",
+    };
+}
 commander_1.program
     .version(pkgFile.version)
     .description("基于yapi快速构建typescript接口库 Autos（https://gogoyqj.github.io/auto-service/）工具")
@@ -72,28 +83,30 @@ commander_1.program
     if (configPath && configPath.length > 0) {
         const cfgPath = GetPathUtils(configPath);
         const jsonParams = require(cfgPath);
-        const createParams = process.argv.slice(0, 2);
-        if (jsonParams.services && jsonParams.services instanceof Array) {
-            if (jsonParams.services.length == 0) {
+        const cfgArray = jsonParams.services;
+        if (cfgArray) {
+            if (cfgArray.length == 0) {
                 console.warn("warning: no services config is founded in cfg file");
                 return;
             }
-            jsonParams.services.forEach((jsonParam) => {
-                for (let index in jsonParam) {
-                    if (index.indexOf("$s") < 0) {
-                        createParams.push(index);
-                        createParams.push(jsonParam[index]);
-                    }
+            function HandleAutos() {
+                if (cfgArray.length > 0) {
+                    const cfg = cfgArray.shift();
+                    DoAutosWithCfg(resolveParams(cfg), () => {
+                        HandleAutos();
+                    });
                 }
-                cmdObj.configPath = undefined;
-                process.argv = createParams;
-                commander_1.program.parse(createParams);
-            });
+            }
+            HandleAutos();
         }
         return;
     }
-    const { url, pName, sDir, template, createTemplate, } = cmdObj;
-    if (Object.values(cmdObj).findIndex((item) => item == undefined) > 0) {
+    DoAutosWithCfg(resolveParams(cmdObj), () => { });
+})
+    .parse(process.argv);
+function DoAutosWithCfg(params, cb) {
+    const { url, pName, sDir, template, createTemplate } = params;
+    if (Object.values(params).findIndex((item) => item == undefined) > 0) {
         console.error("args has error");
         const createParams = process.argv.slice(0, 2);
         createParams.push("--help");
@@ -112,19 +125,6 @@ commander_1.program
         WriteJson2ServiceFile(commandArgs);
         fetchThenAutos(commandArgs);
     }
-    function copyFile(sourcePath, targetPath) {
-        const sourceFile = fs_1.default.readdirSync(sourcePath, {
-            withFileTypes: true,
-        });
-        sourceFile.forEach((file) => {
-            const newSourcePath = path_1.default.resolve(sourcePath, file.name);
-            const newTargetPath = path_1.default.resolve(targetPath, file.name);
-            if (file.isDirectory()) {
-                copyFile(newSourcePath, newTargetPath);
-            }
-            fs_1.default.copyFileSync(newSourcePath, newTargetPath);
-        });
-    }
     function WriteJson2ServiceFile(commandArgs) {
         if (!fs_1.default.existsSync(commandArgs.servicesDir)) {
             fs_1.default.mkdirSync(commandArgs.servicesDir);
@@ -137,7 +137,9 @@ commander_1.program
             if (fs_1.default.existsSync(copyDst) == false) {
                 fs_1.default.mkdirSync(copyDst);
                 const copySrc = GetBuilderPathUtils(templateFileSrc);
-                copyFile(copySrc, copyDst);
+                fs_1.default.cpSync(copySrc, copyDst, {
+                    recursive: true,
+                });
             }
             commandArgs.templateDir = `./${commandArgs.servicesDir}/${commandArgs.apiName}/template`;
         }
@@ -159,7 +161,7 @@ commander_1.program
         if (!fs_1.default.existsSync(indexTsPath)) {
             const json2serviceFile = fs_1.default.createWriteStream(indexTsPath);
             json2serviceFile.write(`// 导出services 全部模块 \nexport * from "./services"
-          `);
+        `);
         }
     }
     // autos https://gogoyqj.github.io/auto-service/
@@ -168,14 +170,18 @@ commander_1.program
         https_1.default
             .get(commandArgs.yApiUrl, (data) => data.pipe(fs_1.default.createWriteStream(savePath)))
             .on("close", () => {
-            (0, child_process_1.spawn)(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`, '-c', 'json2service.js'], {
+            (0, child_process_1.spawn)(process.platform === "win32" ? "npx.cmd" : "npx", [`autos`, "-c", "json2service.js"], {
                 cwd: `./${commandArgs.servicesDir}/${commandArgs.apiName}`,
                 stdio: "inherit",
+            }).on("exit", () => {
+                cb();
             });
         });
     }
     if (commandArgs.servicesDir && commandArgs.apiName) {
         Build(commandArgs);
     }
-})
-    .parse(process.argv);
+    else {
+        cb(new Error("bad args"));
+    }
+}
